@@ -24,6 +24,10 @@ PYNFS_KERNEL_CI_LOOP      := scripts/workflows/pynfs/run_kernel_ci.sh
 PYNFS_KERNEL_CI_LOOP_KOTD := scripts/workflows/pynfs/run_kernel_ci_kotd.sh
 endif # CONFIG_KERNEL_CI
 
+ifndef LAST_KERNEL
+LAST_KERNEL := $(shell cat workflows/pynfs/results/last-kernel.txt 2>/dev/null)
+endif
+
 # Makefile for pynfs targets
 pynfs:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -l baseline,dev \
@@ -62,6 +66,14 @@ pynfs-dev-kernelci:
 pynfs-dev-reset:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts -l dev playbooks/pynfs.yml --tags vars,reset --extra-vars=@./extra_vars.yaml
+
+pynfs-show-results:
+ifdef LAST_KERNEL
+	@find workflows/pynfs/results/$(LAST_KERNEL) -type f \
+		| xargs -I {} bash -c 'echo "{}:"; cat {}; echo -e "\n";'
+else
+	@echo "No results."
+endif
 
 pynfs-help-menu:
 	@echo "pynfs options:"
