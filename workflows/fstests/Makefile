@@ -115,6 +115,14 @@ ifneq (,$(COUNT))
 FSTESTS_DYNAMIC_RUNTIME_VARS += , "oscheck_extra_args": "-I $(COUNT)"
 endif
 
+ifndef LAST_KERNEL
+LAST_KERNEL := $(shell cat workflows/fstests/results/last-kernel.txt 2>/dev/null)
+endif
+
+ifndef PATTERN
+PATTERN := -name result.xml
+endif
+
 fstests: $(FSTESTS_BASELINE_EXTRA)
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -l localhost,baseline,dev \
 		-f 30 -i hosts playbooks/fstests.yml --skip-tags run_tests,copy_results $(LIMIT_HOSTS)
@@ -217,6 +225,14 @@ fstests-dev-results: $(KDEVOPS_EXTRA_VARS)
 		--extra-vars '{ kdevops_run_fstests: True }' \
 		--extra-vars=@./extra_vars.yaml \
 		$(LIMIT_HOSTS)
+
+fstests-show-results:
+ifdef LAST_KERNEL
+	@find workflows/fstests/results/$(LAST_KERNEL) -type f $(PATTERN) \
+		| xargs -I {} bash -c 'echo "{}:"; cat {}; echo;'
+else
+	@echo "No results."
+endif
 
 fstests-help-menu:
 	@echo "fstests options:"
