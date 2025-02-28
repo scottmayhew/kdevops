@@ -53,6 +53,10 @@ NFSTEST_KERNEL_CI_LOOP      := scripts/workflows/nfstest/run_kernel_ci.sh
 NFSTEST_KERNEL_CI_LOOP_KOTD := scripts/workflows/nfstest/run_kernel_ci_kotd.sh
 endif # CONFIG_KERNEL_CI
 
+ifndef LAST_KERNEL
+LAST_KERNEL := $(shell cat workflows/nfstest/results/last-kernel.txt 2>/dev/null)
+endif
+
 nfstest:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -l baseline,dev \
 		-f 30 -i hosts playbooks/nfstest.yml \
@@ -87,6 +91,19 @@ nfstest-dev-reset:
 		-f 30 -i hosts -l dev playbooks/nfstest.yml \
 		--tags vars,reset \
 		--extra-vars=@./extra_vars.yaml
+
+nfstest-show-results:
+ifdef LAST_KERNEL
+ifeq ($(LAST_KERNEL), $(shell cat workflows/nfstest/results/last-kernel.txt 2>/dev/null))
+	@find workflows/nfstest/results/$(LAST_KERNEL) -type f $(PATTERN) -newer workflows/nfstest/results/last-run \
+		| xargs -I {} bash -c 'echo "{}:"; cat {}; echo;'
+else
+	@find workflows/nfstest/results/$(LAST_KERNEL) -type f $(PATTERN) \
+		| xargs -I {} bash -c 'echo "{}:"; cat {}; echo;'
+endif
+else
+	@echo "No results."
+endif
 
 nfstest-help-menu:
 	@echo "nfstest options:"
