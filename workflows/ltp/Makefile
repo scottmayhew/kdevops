@@ -96,6 +96,14 @@ LTP_KERNEL_CI_LOOP      := scripts/workflows/ltp/run_kernel_ci.sh
 LTP_KERNEL_CI_LOOP_KOTD := scripts/workflows/ltp/run_kernel_ci_kotd.sh
 endif # CONFIG_KERNEL_CI
 
+ifndef LAST_KERNEL
+LAST_KERNEL := $(shell cat workflows/ltp/results/last-kernel.txt 2>/dev/null)
+endif
+
+ifndef PATTERN
+PATTERN := -name "*.failed"
+endif
+
 ltp:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) -l baseline,dev \
 		-f 30 -i hosts playbooks/ltp.yml --skip-tags run_tests,copy_results
@@ -127,6 +135,19 @@ ltp-dev-reset:
 	$(Q)ansible-playbook $(ANSIBLE_VERBOSE) \
 		-f 30 -i hosts -l dev playbooks/ltp.yml \
 		--tags vars,reset --extra-vars=@./extra_vars.yaml
+
+ltp-show-results:
+ifdef LAST_KERNEL
+ifeq ($(LAST_KERNEL), $(shell cat workflows/ltp/results/last-kernel.txt 2>/dev/null))
+	find workflows/ltp/results/$(LAST_KERNEL) -type f $(PATTERN) -newer workflows/ltp/results/last-run \
+		| xargs -I {} bash -c 'echo "{}:"; cat {}; echo;'
+else
+	@find workflows/ltp/results/$(LAST_KERNEL) -type f $(PATTERN) \
+		| xargs -I {} bash -c 'echo "{}:"; cat {}; echo;'
+endif
+else
+	@echo "No results."
+endif
 
 ltp-help-menu:
 	@echo "ltp options:"
