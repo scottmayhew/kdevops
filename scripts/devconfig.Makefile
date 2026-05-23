@@ -9,6 +9,11 @@ CUSTOM_YUM_REPOFILE:=$(subst ",,$(CONFIG_KDEVOPS_CUSTOM_YUM_REPOFILE))
 ANSIBLE_EXTRA_ARGS_DIRECT += devconfig_custom_yum_repofile="$(CUSTOM_YUM_REPOFILE)"
 endif
 
+ifneq ($(strip $(CONFIG_KDEVOPS_CUSTOM_CA_CERTS)),)
+CUSTOM_CA_CERTS:=$(subst ",,$(CONFIG_KDEVOPS_CUSTOM_CA_CERTS))
+ANSIBLE_EXTRA_ARGS_DIRECT += devconfig_custom_ca_certs="$(CUSTOM_CA_CERTS)"
+endif
+
 ifeq (y,$(CONFIG_KDEVOPS_TRY_UPDATE_SYSTEMS))
 ANSIBLE_EXTRA_ARGS += devconfig_try_upgrade=True
 endif

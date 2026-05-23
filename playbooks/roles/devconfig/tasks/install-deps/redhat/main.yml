@@ -33,6 +33,38 @@
     - devconfig_custom_yum_repofile | default('', true) | length > 0
     - custom_repofile.stat.exists
 
+- name: Check whether custom CA cert files exist
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: "{{ (devconfig_custom_ca_certs | default('', true)).split(',') }}"
+  register: ca_cert_stat
+  delegate_to: localhost
+  when: devconfig_custom_ca_certs | default('', true) | length > 0
+
+- name: Install custom CA certs
+  become: true
+  become_method: sudo
+  ansible.builtin.copy:
+    src: "{{ item.item }}"
+    dest: "/etc/pki/ca-trust/source/anchors/{{ item.item | basename }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ ca_cert_stat.results | default([]) }}"
+  when:
+    - item.stat is defined
+    - item.stat.exists
+  register: ca_cert_install
+
+- name: Update CA trust
+  become: true
+  become_method: sudo
+  ansible.builtin.command:
+    cmd: /usr/bin/update-ca-trust
+  when:
+    - ca_cert_install is defined
+    - ca_cert_install.changed
+
 - name: Discover the fastest package update mirrors
   become: true
   become_method: ansible.builtin.sudo

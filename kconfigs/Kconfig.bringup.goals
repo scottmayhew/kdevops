@@ -60,6 +60,15 @@ config KDEVOPS_CUSTOM_YUM_REPOFILE
 	  Add a custom yum repo file to /etc/yum.repos.d before updating? Leave blank to
 	  disable this feature or set to repofile path on local machine.
 
+config KDEVOPS_CUSTOM_CA_CERTS
+	string "Custom CA certificate files"
+	default ""
+	help
+	  A comma-separated list of CA certificate files on the local machine
+	  to install on Red Hat-based target systems before updating. Leave
+	  blank to disable this feature. The certificates will be copied to
+	  /etc/pki/ca-trust/source/anchors and update-ca-trust will be run.
+
 config KDEVOPS_TRY_UPDATE_SYSTEMS
 	bool "Try to update target hosts on bringup?"
 	depends on KDEVOPS_TRY_REFRESH_REPOS
