@@ -45,6 +45,7 @@
     name: "kernel-{{ kernel_version }}.{{ arch }}"
     disable_gpg_check: true
     sslverify: false
+    allow_downgrade: true
     state: present
   when:
     - devconfig_enable_kotd|bool
