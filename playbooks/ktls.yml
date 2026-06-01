@@ -1,6 +1,6 @@
 ---
 # SPDX-License-Identifier: copyleft-next-0.3.1
 - name: Provision self-signed TLS certs and enable tlshd for kernel TLS testing (ktls)
-  hosts: baseline:dev
+  hosts: baseline:dev:nfsd
   roles:
     - role: ktls
