@@ -23,7 +23,7 @@ for bs in "${BSES[@]}"; do
     c0=$(busy); t0=$(date +%s.%N)
     for ng in "${NGS[@]}"; do
       sudo taskset -c 0-$((c-1)) "$SMOKE" --dev "$ng" --count $cnt --qd $QD \
-        --len $len --lba-size $LBA --cmds-per-obj 1 --premap >/tmp/pf_$(basename $ng).json 2>&1 &
+        --len $len --lba-size $LBA --cmds-per-obj 1 --random --range-gib ${RANGE_GIB:-32} --premap >/tmp/pf_$(basename $ng).json 2>&1 &
     done
     wait
     t1=$(date +%s.%N); c1=$(busy)
@@ -38,7 +38,7 @@ for f in glob.glob('/tmp/pf_ng*.json'):
         iops+=d.get('iops',0.0); byps+=d.get('bytes_per_second',0.0)
         p99=max(p99, d.get('latency_ns',{}).get('p99',0)/1000.0)
     except Exception: pass
-bw=byps/1e6  # MB/s
+bw=byps/1048576.0  # MiB/s (plot divides by 1024 for GiB/s)
 bc=($c1-$c0)/100/wall
 print(f'kernel_premap,$bs,$c,{iops:.0f},{bw:.0f},{p99:.0f},{bc:.2f}')
 " | tee -a "$CSV"

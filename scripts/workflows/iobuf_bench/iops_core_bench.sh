@@ -142,7 +142,8 @@ dma_validate(){
       sudo $PERF stat -a -e iommu:map,iommu:unmap -o /tmp/dv.txt -- \
         taskset -c $CORE $SMOKE --dev $NG --count 800000 --qd 32 --len $size --lba-size $LBA \
           --cmds-per-obj 1 --random --range-gib $RANGE_GIB $flags >/dev/null 2>/tmp/dv.json
-      local ios=$(grep '^{' /tmp/dv.json | python3 -c "import json,sys;print(json.load(sys.stdin).get('successful_commands',0))" 2>/dev/null)
+      local ios=$(grep '^{' /tmp/dv.json | tail -1 | python3 -c "import json,sys;print(json.load(sys.stdin).get('successful_commands',0))" 2>/dev/null)
+      : "${ios:=0}"; [ "$ios" -gt 0 ] || echo "WARNING: dma_validate could not parse ios; maps_per_io will be invalid" >&2
       local maps=$(grep 'iommu:map' /tmp/dv.txt | awk '{gsub(/,/,"",$1);print $1}')
       echo "$name size=$size ios=$ios iommu_maps=$maps maps_per_io=$(python3 -c "print(round(${maps:-0}/${ios:-1},6))" 2>/dev/null)" | tee -a "$v"
     done

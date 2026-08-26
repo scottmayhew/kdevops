@@ -70,7 +70,7 @@ kernel_premap(){ local bs len d
 		c0=$(busy); t0=$(date +%s.%N)
 		for d in "${NGS[@]}"; do
 			sudo taskset -c $CORE "$SMOKE" --dev "$d" --count 40000 --qd $QD --len $len \
-				--lba-size 512 --cmds-per-obj 1 --premap >/dev/null 2>&1 &
+				--lba-size 512 --cmds-per-obj 1 --random --range-gib ${RANGE_GIB:-32} --premap >/dev/null 2>&1 &
 		done; wait
 		t1=$(date +%s.%N); c1=$(busy)
 		python3 -c "wall=$t1-$t0;gib=$N*40000*$len/1073741824;gbs=gib/wall;io=$N*40000/wall;bc=($c1-$c0)/100/wall;print(f'kernel_premap,$bs,1,{io:.0f},{gbs*1024:.0f},{bc:.3f}')" | tee -a "$CSV"

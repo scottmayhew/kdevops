@@ -36,7 +36,7 @@ d=json.load(open('$SP/tb_fio.json'))
 iops=sum(j['read']['iops'] for j in d['jobs'])
 bw=sum(j['read']['bw'] for j in d['jobs'])/1024
 p99=max(j['read']['clat_ns']['percentile']['99.000000'] for j in d['jobs'])/1000
-tc=($c1-$c0)/100/$T
+tc=($c1-$c0)/100/($T+3)   # window includes fio's 3s ramp
 print(f'$arm,$bs,$qd,{iops:.0f},{bw:.0f},{p99:.0f},{tc:.2f}')
 " | tee -a "$CSV"
   done; done

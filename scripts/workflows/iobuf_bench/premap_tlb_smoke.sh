@@ -44,6 +44,10 @@ run(){
   printf '%s,%s,%.1f,%s\n' "$BOOT" "$arm" "$(python3 -c "print($c/$COUNT)")" "$REPS" | tee -a "$CSV"
 }
 run hugepage --hugepage
+# corrected attribution control: REGISTERED hugepage fixed buffer, so the
+# premap delta measures mapping retention, not per-IO import of an
+# unregistered buffer (methodology fix, 2026-08-26 review)
+run hugepage-fixed "--hugepage --fixed"
 run premap --premap
 run strict-premap --strict-premap
 echo "wrote $CSV"
