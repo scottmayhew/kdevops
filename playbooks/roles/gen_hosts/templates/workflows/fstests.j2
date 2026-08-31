@@ -52,6 +52,14 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
 {% endfor %}
 
+{% if kdevops_enable_iscsi %}
+[iscsi]
+{{ kdevops_host_prefix }}-iscsi
+
+[iscsi:vars]
+ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
+{% endif %}
+
 [nfsd]
 {% if kdevops_nfsd_enable %}
 {{ kdevops_host_prefix }}-nfsd
@@ -60,12 +68,45 @@ ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 [nfsd:vars]
 ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
 
+[smbd]
+{% if kdevops_smbd_enable %}
+{{ kdevops_host_prefix }}-smbd
+{% endif %}
+
+[smbd:vars]
+ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
+
+{% if kdevops_krb5_enable %}
+[kdc]
+{{ kdevops_host_prefix }}-kdc
+
+[kdc:vars]
+ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
+
+[krb5]
+{% for node_section in fstests_enabled_test_types %}
+{{ kdevops_host_prefix }}-{{ node_section }}
+{% endfor %}
+{% if kdevops_nfsd_enable %}
+{{ kdevops_host_prefix }}-nfsd
+{% endif %}
+
+[krb5:vars]
+ansible_python_interpreter = "{{ kdevops_python_interpreter }}"
+{% endif %}
+
 [service]
 {% if kdevops_enable_iscsi %}
 {{ kdevops_host_prefix }}-iscsi
 {% endif %}
 {% if kdevops_nfsd_enable %}
 {{ kdevops_host_prefix }}-nfsd
+{% endif %}
+{% if kdevops_smbd_enable %}
+{{ kdevops_host_prefix }}-smbd
+{% endif %}
+{% if kdevops_krb5_enable %}
+{{ kdevops_host_prefix }}-kdc
 {% endif %}
 
 [service:vars]
