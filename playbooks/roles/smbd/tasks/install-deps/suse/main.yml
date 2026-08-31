@@ -20,7 +20,7 @@
     smbd_packages: "{{ smbd_packages + [fsprogs] }}"
   when:
     - fsprogs is defined
-    - fsprogs
+    - fsprogs | default('', true) | length > 0
 
 - name: Install smbd dependencies
   become: true
